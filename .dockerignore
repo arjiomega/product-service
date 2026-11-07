@@ -1,0 +1,4 @@
+migrations/
+.github/
+.env
+.env.*
