@@ -1,4 +1,4 @@
-name: Product Service CI/CD
+name: Product Service CI
 
 on:
   push:
@@ -7,10 +7,6 @@ on:
   pull_request:
     branches:
       - main
-
-concurrency:
-  group: product-service-production
-  cancel-in-progress: false
 
 jobs:
   test:
@@ -46,31 +42,3 @@ jobs:
         env:
           TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
         run: go test ./...
-
-  migrate:
-      name: Run Database Migrations
-      runs-on: ubuntu-latest
-
-      # Only migrate when changes are pushed to main,
-      # not when a pull request is opened.
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-      environment: production
-
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
-
-        - name: Set up Go
-          uses: actions/setup-go@v5
-          with:
-            go-version-file: go.mod
-            cache: true
-
-        - name: Install Goose
-          run: go install github.com/pressly/goose/v3/cmd/goose@v3.29.0
-
-        - name: Run migrations
-          env:
-            DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          run: goose -dir migrations postgres "$DATABASE_URL" up
