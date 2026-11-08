@@ -30,6 +30,13 @@ func setupTestDB(t *testing.T) *sql.DB {
 		t.Fatal(err)
 	}
 
+	// Ensure each test starts with an empty database.
+	_, err = db.Exec(`TRUNCATE TABLE product_variants, products CASCADE`)
+	if err != nil {
+		db.Close()
+		t.Fatalf("failed to clean test database: %v", err)
+	}
+
 	t.Cleanup(func() {
 		db.Close()
 	})
