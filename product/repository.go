@@ -33,11 +33,9 @@ func (r *Repository) Create(
 	}
 	defer tx.Rollback()
 
-	productID := uuid.New()
 	now := time.Now().UTC()
 
 	product := api.Product{
-		Id:          api.ID(productID),
 		Name:        input.Name,
 		Description: input.Description,
 		Status:      api.Draft,
@@ -49,12 +47,11 @@ func (r *Repository) Create(
 		ctx,
 		`
 		INSERT INTO products (
-			id, name, description, status, created_at, updated_at
+			name, description, status, created_at, updated_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id
 		`,
-		productID,
 		product.Name,
 		product.Description,
 		product.Status,
@@ -70,10 +67,7 @@ func (r *Repository) Create(
 
 	if input.Variants != nil {
 		for _, variant := range *input.Variants {
-			variantID := uuid.New()
-
 			productVariant := api.ProductVariant{
-				Id:        api.ID(variantID),
 				Name:      variant.Name,
 				Sku:       variant.Sku,
 				Price:     variant.Price,
@@ -86,14 +80,13 @@ func (r *Repository) Create(
 				ctx,
 				`
 				INSERT INTO product_variants (
-					id, product_id, name, sku, price,
+					product_id, name, sku, price,
 					status, created_at, updated_at
 				)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+				VALUES ($1, $2, $3, $4, $5, $6, $7)
 				RETURNING id
 				`,
-				variantID,
-				productID,
+				product.Id,
 				productVariant.Name,
 				productVariant.Sku,
 				productVariant.Price,

@@ -13,6 +13,40 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  test:
+    name: Test Product Service
+    runs-on: ubuntu-latest
+    environment: testing
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install Goose
+        run: go install github.com/pressly/goose/v3/cmd/goose@v3.29.0
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+        run: goose -dir migrations postgres "$DATABASE_URL" up
+
+      - name: Clean test database
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+        run: |
+          psql "$DATABASE_URL" -c "
+            TRUNCATE TABLE product_variants, products CASCADE;
+          "
+
+      - name: Run tests
+        env:
+          TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+        run: go test ./...
+
   migrate:
       name: Run Database Migrations
       runs-on: ubuntu-latest
