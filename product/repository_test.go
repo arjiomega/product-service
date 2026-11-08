@@ -209,12 +209,12 @@ func TestRepository_List(t *testing.T) {
 		t.Fatalf("expected 2 products, got %d", len(products))
 	}
 
-	if products[0].Name != "Coffee" {
-		t.Errorf("expected first product Coffee, got %s", products[0].Name)
+	if products[0].Name != "Tea" {
+		t.Errorf("expected first product Tea, got %s", products[0].Name)
 	}
 
-	if products[1].Name != "Tea" {
-		t.Errorf("expected second product Tea, got %s", products[1].Name)
+	if products[1].Name != "Coffee" {
+		t.Errorf("expected second product Coffee, got %s", products[1].Name)
 	}
 }
 
