@@ -11,15 +11,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/joho/godotenv"
 )
 
 func run() error {
-
-	// Load environment variables
-	if err := godotenv.Load(); err != nil {
-		return err
-	}
 
 	// Database connection
 	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
@@ -48,7 +42,12 @@ func run() error {
 
 	api.RegisterHandlers(router, handler)
 
-	return router.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	return router.Run(":" + port)
 }
 
 func main() {
